@@ -1,5 +1,6 @@
 #!/usr/bin/python
 from optparse import OptionParser
+import time
 
 from news_parser import *
 from chaskor_parser import ChaskorParser
@@ -44,8 +45,14 @@ def main():
 		if opt.type_parser == 3:
 			news_parser = LentaParser(config=opt.config, debug=opt.debug)
 
-		#feed_list = news_parser.get_feed_list()
-		news_parser.fetch_all_feed_lists()
+		feed_list = news_parser.get_feed_list(url='http://ria.ru/export/rss2/politics/index.xml')
+
+		# +0000
+		time_mark = time.strptime("Tue May 05 09:40:00 2015")
+
+		news_after_date = news_parser.filter_by_time(feed_list, time_mark)
+
+		#news_parser.fetch_all_feed_lists()
 		#all_feed_data = news_parser.fetch_news_by_feed_list(feed_list)
 
 if __name__ == '__main__':

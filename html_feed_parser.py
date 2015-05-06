@@ -62,7 +62,7 @@ class FeedHTMLParser(HTMLParser):
 		self.level_tags.append(None)
 
 	def handle_data(self, data):
-		if self.level_tags[-1] is None:
+		if len(self.level_tags) == 0 or self.level_tags[-1] is None:
 			return
 		print("Tag {} data {}".format(self.level_tags[-1].tag, data))
 		self.level_tags[-1].data = data
