@@ -61,6 +61,31 @@ class BaseNewsParser:
 
 			news_item[key] = self.__get_text_extr_data__(key, feed[key])
 
+	def __parse_date__(self, date):
+		m = re.match(r"(?P<weekday>\w+), (?P<day>\d{1,2}) (?P<month>\w{2,10}) "\
+						"(?P<year>\d{4}) (?P<h>\d{2}):(?P<m>\d{2}):(?P<s>\d{2}) "\
+						"\+(?P<diff_h>\d{2})(?P<diff_m>\d{2})""", date)
+		if m is None:
+			print("INF: date='{}' has incorrect format. pass".format(date))
+			return None
+		converted_time = datetime(year=int(m.group('year')),
+								month=list(calendar.month_abbr).index(m.group('month')),
+								day=int(m.group('day')), hour=(int(m.group('h'))),
+								minute=int(m.group('m')), second=(int(m.group('s'))))
+		# to +0000
+		converted_time -= timedelta(hours=int(m.group('diff_h')), minutes=int(m.group('diff_m')))
+		conv_time_str = converted_time.strftime("%a %b %d %H:%M:%S %Y")
+		converted_time = time.strptime(conv_time_str)
+		return converted_time
+
+	def __store_parsed_date__(self, news_item, parsed_date_name, date_name):
+		if	parsed_date_name not in news_item.keys() and \
+			date_name in news_item.keys() and \
+			news_item[date_name] != "":
+			converted_date = self.__parse_date__(news_item[date_name])
+			if converted_date is not None:
+				news_item[parsed_date_name] = converted_date
+
 	def __set_opt_fields__(self, news_item, feed, dict_keys):
 		for (key, val) in dict_keys.items():
 			news_item_data = None
@@ -89,8 +114,10 @@ class BaseNewsParser:
 					news_item_data = feed_var
 				else:
 					news_item_data = feed_var[val['sub_field']]
-
 			news_item[key] = self.__get_text_extr_data__(key, news_item_data)
+
+		self.__store_parsed_date__(news_item, 'published_parsed', 'published')
+		self.__store_parsed_date__(news_item, 'updated_parsed', 'updated')
 
 	def __form_news_list__(self, rss_news):
 		# Parse news_agent data 
@@ -128,12 +155,10 @@ class BaseNewsParser:
 		return {'news_agent': news_agent_data,
 				'news_items': news}
 
-
 	def fetch_news_by_feed_list(self, news_data):
 		conn = Connector()
 		for n in news_data['news_items']:
-			# TODO: check if link is valid?
-			print("Fetching news page for '{}'".format(n['link']))
+			print("INF: Fetching news page for '{}'".format(n['link']))
 			news_item_page = conn.get(url=n['link'])
 			n['web_page'] = news_item_page.data
 			#print("Web page {}".format(news_item_page.data))
@@ -145,29 +170,6 @@ class BaseNewsParser:
 				if n['published_parsed'] > time_mark:
 					print("Append news item: {}".format(n['title']))
 					news_after_date.append(n)
-			elif 'published' in n.keys() and n['published'] != '':
-				m = re.match(r"(?P<weekday>\w+), (?P<day>\d{1,2}) (?P<month>\w{2,10}) "\
-								"(?P<year>\d{4}) (?P<h>\d{2}):(?P<m>\d{2}):(?P<s>\d{2}) "\
-								"\+(?P<diff_h>\d{2})(?P<diff_m>\d{2})""", n['published'])
-				if m is None:
-					print("INF: 'published'='{}' has incorrect format. pass".format(n['published']))
-					continue
-				try:
-					converted_time = datetime(year=int(m.group('year')),
-											month=list(calendar.month_abbr).index(m.group('month')),
-											day=int(m.group('day')), hour=(int(m.group('h'))),
-											minute=int(m.group('m')), second=(int(m.group('s'))))
-					# to +0000
-					converted_time -= timedelta(hours=int(m.group('diff_h')), minutes=int(m.group('diff_m')))
-					conv_time_str = converted_time.strftime("%a %b %d %H:%M:%S %Y")
-					converted_time = time.strptime(conv_time_str)
-
-					if converted_time > time_mark:
-						print("Append news item: {}".format(n['title']))
-						news_after_date.append(converted_time)
-				except:
-					print("ERR: while converting {} to time struct".format(n['published']))
-
 		return news_after_date
 
 	def get_feed_list(self, url=None):
@@ -177,10 +179,8 @@ class BaseNewsParser:
 				return None
 			url = self.news_url
 		#try:
-		print("Request RSS from '{}'".format(url))
+		print("INF: Request RSS from '{}'".format(url))
 		rss_news = feedparser.parse(url)
-		print("RSS data recieved")
-
 		return self.__form_news_list__(rss_news)
 		#except Exception as exp:
 		#	print("ERR: {}".format(exp))
