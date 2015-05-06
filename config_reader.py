@@ -11,7 +11,8 @@ class ConfigReader():
 			with open(config_file, mode='r', encoding='utf-8') as cfg_file:
 				m = re.compile(r"(?P<url>http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)\s+(?P<term>(?:\'[\s\w]+\')+)?")
 				for line in cfg_file:
-					print("Line {}".format(line))
+					if debug:
+						print("Line {}".format(line))
 					result = m.match(line)
 
 					if result is None:
