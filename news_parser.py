@@ -25,7 +25,11 @@ class BaseNewsParser:
 											'sub_field': 'term'},\
 								'summary': ""					}
 		self.debug = debug
-		self.rss_urls = ConfigReader.get_urls_names(config)
+
+		config_reader = ConfigReader()
+		config_reader.read(config)
+		self.rss_urls = config_reader.url_names
+		self.freq = config_reader.freq
 
 		# Fields that are needed to be without html tags
 		self.text_extr_fields = set()
