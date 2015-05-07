@@ -1,4 +1,5 @@
-use news_db
+conn = new Mongo()
+db = conn.getDB("news_db")
 db.dropDatabase()
 db.news_agent.insert({'name': "коммерсантъ"})
 db.news_agent.createIndex({'name': 1}, { unique: true })
