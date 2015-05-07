@@ -240,4 +240,3 @@ class BaseNewsParser:
 
 		for rss_url in self.rss_urls:
 			self.fetch_and_store_news(rss_url, self.time_mark)
-			break
