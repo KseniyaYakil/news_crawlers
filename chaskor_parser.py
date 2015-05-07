@@ -6,3 +6,4 @@ class ChaskorParser(BaseNewsParser):
 
 		self.opt_for_items['text'] = {'field': 'yandex_full-text'}
 		self.text_extr_fields.add('text')
+		self.news_agent_name = "частный корреспондент"

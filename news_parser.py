@@ -7,6 +7,7 @@ import re
 
 from config_reader import ConfigReader
 from connector import Connector
+from mongodb_connector import DBConnector
 from html_feed_parser import Tag, FeedHTMLParser, CutHTML
 
 # from RSS 
@@ -26,6 +27,7 @@ class BaseNewsParser:
 								'summary': ""					}
 		self.debug = debug
 
+		# Read config parametrs
 		config_reader = ConfigReader()
 		config_reader.read(config)
 		self.rss_urls = config_reader.url_names
@@ -37,6 +39,14 @@ class BaseNewsParser:
 
 		self.cut_html = CutHTML()
 		self.cut_html.reset()
+
+		# Connect to db
+		self.db_connector = DBConnector(debug=self.debug)
+
+		# News agent name and time mark
+		self.news_agent_name = ""
+		# + 0000
+		self.time_mark = None
 
 	def __set_text_extract_fields__(self):
 		text_extr = ['term', 'summary', 'title', 'description', 'subtitle']
@@ -155,23 +165,6 @@ class BaseNewsParser:
 		return {'news_agent': news_agent_data,
 				'news_items': news}
 
-	def fetch_news_by_feed_list(self, news_data):
-		conn = Connector()
-		for n in news_data['news_items']:
-			print("INF: Fetching news page for '{}'".format(n['link']))
-			news_item_page = conn.get(url=n['link'])
-			n['web_page'] = news_item_page.data
-			#print("Web page {}".format(news_item_page.data))
-
-	def filter_by_time(self, news_data, time_mark):
-		news_after_date = []
-		for n in news_data['news_items']:
-			if 'published_parsed' in n.keys():
-				if n['published_parsed'] > time_mark:
-					print("Append news item: {}".format(n['title']))
-					news_after_date.append(n)
-		return news_after_date
-
 	def get_feed_list(self, url=None):
 		if url is None:
 			if self.news_url is None:
@@ -186,11 +179,65 @@ class BaseNewsParser:
 		#	print("ERR: {}".format(exp))
 		#	return None
 
+	def filter_by_time(self, news_data, time_mark):
+		news_after_date = []
+		for n in news_data['news_items']:
+			if 'published_parsed' in n.keys():
+				if n['published_parsed'] > time_mark:
+					print("Append news item: {}".format(n['title']))
+					news_after_date.append(n)
+		return news_after_date
+
+	def fetch_news_by_feed_list(self, news_data):
+		conn = Connector()
+		for n in news_data['news_items']:
+			print("INF: Fetching news page for '{}'".format(n['link']))
+			news_item_page = conn.get(url=n['link'])
+			n['web_page'] = news_item_page.data
+			#print("Web page {}".format(news_item_page.data))
+
+	def __store_news_data__(self, news_data, section_from_config, news_agent_name):
+		news_agent_id = self.db_connector.find_or_insert_news_agent(news_agent_name)
+		news_data['news_agent']['news_agent_id'] = news_agent_id
+		news_subagent_id = self.db_connector.find_or_insert_news_subagent(news_data['news_agent'])
+
+		try:
+			for n in news_data['news_items']:
+				if	'term' not in n.keys() and \
+					section_from_config != "":
+					n['term'] = section_from_config
+				if 'published' in n.keys():
+					if 'published_parsed' in n.keys():
+						del n['published']
+				if news_subagent_id is not None:
+					n['subagent_id'] = news_subagent_id
+
+				self.db_connector.insert_news_item(n)
+		except:
+			print("ERR: couldn't insert all news")
+
+	# XXX: assume that db_connection is established
+	def fetch_and_store_news(self, rss_url_info, time_mark):
+		# Get news items list from rss 
+		news_data = self.get_feed_list(rss_url_info['url'])
+		# Filter by time mark
+		if time_mark is not None:
+			news_data = self.filter_by_time(news_data, time_mark)
+		# Fetch web pages for news in list
+		self.fetch_news_by_feed_list(news_data)
+
+		# Store news in db
+		self.__store_news_data__(news_data, rss_url_info['term'], self.news_agent_name)
+
 	# Fetch feed lists according to config urls
 	def fetch_all_feed_lists(self):
 		if len(self.rss_urls) == 0:
 			print("ERR: unable to fetch all feed lists: no feed lists")
 			return -1
+		if self.db_connector is None:
+			print("ERR: unable to store news items: no db connection")
+			return -2
 
 		for rss_url in self.rss_urls:
-			news_data = self.get_feed_list(rss_url['url'])
+			self.fetch_and_store_news(rss_url, self.time_mark)
+			break
