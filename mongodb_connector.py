@@ -78,6 +78,7 @@ class DBConnector():
 				print("INF: news_item: inserted {}, id = {}".format(news_item['title'], news_item_id))
 			return news_item_id
 		except:
-			print("INF: news_item: already exist title={} link={}".format(	news_item['title'],
+			if self.debug:
+				print("INF: news_item: already exist title={} link={}".format(	news_item['title'],
 																			news_item['link']))
 			return None

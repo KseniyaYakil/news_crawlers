@@ -8,7 +8,7 @@ import re
 from config_reader import ConfigReader
 from connector import Connector
 from mongodb_connector import DBConnector
-from html_feed_parser import Tag, FeedHTMLParser, CutHTML
+from html_feed_parser import CutHTML
 
 # from RSS 
 class BaseNewsParser:
@@ -184,17 +184,20 @@ class BaseNewsParser:
 		for n in news_data['news_items']:
 			if 'published_parsed' in n.keys():
 				if n['published_parsed'] > time_mark:
-					print("Append news item: {}".format(n['title']))
+					if self.debug:
+						print("Append news item: {}".format(n['title']))
 					news_after_date.append(n)
 		return news_after_date
+
+	def __get_article_from_html__(self, news_item, web_page):
+		news_item['web_page'] = web_page
 
 	def fetch_news_by_feed_list(self, news_data):
 		conn = Connector()
 		for n in news_data['news_items']:
 			print("INF: Fetching news page for '{}'".format(n['link']))
 			news_item_page = conn.get(url=n['link'])
-			n['web_page'] = news_item_page.data
-			#print("Web page {}".format(news_item_page.data))
+			self.__get_article_from_html__(n, news_item_page.data)
 
 	def __store_news_data__(self, news_data, section_from_config, news_agent_name):
 		news_agent_id = self.db_connector.find_or_insert_news_agent(news_agent_name)
@@ -209,8 +212,7 @@ class BaseNewsParser:
 				if 'published' in n.keys():
 					if 'published_parsed' in n.keys():
 						del n['published']
-				if news_subagent_id is not None:
-					n['subagent_id'] = news_subagent_id
+				n['subagent_id'] = news_subagent_id
 
 				self.db_connector.insert_news_item(n)
 		except:
