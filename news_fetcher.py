@@ -1,6 +1,7 @@
 #!/usr/bin/python
 from optparse import OptionParser
 import time
+from datetime import timedelta, datetime
 
 from news_parser import *
 from chaskor_parser import ChaskorParser
@@ -15,6 +16,8 @@ def parse_options():
 		parser.add_option(
 						"-c", "--config", dest="config",
 						help="configuration file")
+		parser.add_option("-f", "--freq", dest="freq", action="store_true",
+						help="fetching news according to config with setted frequency (min)")
 		parser.add_option(
 						"-t", "--type", dest="type_parser",
 						type="int",
@@ -45,15 +48,18 @@ def main():
 		if opt.type_parser == 3:
 			news_parser = LentaParser(config=opt.config, debug=opt.debug)
 
-		#feed_list = news_parser.get_feed_list(url='http://ria.ru/export/rss2/politics/index.xml')
-
-		# +0000
 		#time_mark = time.strptime("Tue May 05 09:40:00 2015")
-
-		#news_after_date = news_parser.filter_by_time(feed_list, time_mark)
-
-		news_parser.fetch_all_feed_lists()
-		#all_feed_data = news_parser.fetch_news_by_feed_list(feed_list)
+		if opt.freq:
+			freq_sec = news_parser.freq * 60
+			while True:
+				t_start = time.time()
+				news_parser.fetch_all_feed_lists()
+				t_end = time.time()
+				delta_sec = t_end - t_start
+				if freq_sec > delta_sec:
+					time.sleep(freq_sec - delta_sec)
+		else:
+			news_parser.fetch_all_feed_lists()
 
 if __name__ == '__main__':
 		main()
