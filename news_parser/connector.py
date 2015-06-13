@@ -20,7 +20,7 @@ class Connector:
 							return None
 
 						if resp.status != 200:
-							print('INF: bad response (status {})'.format(res.status))
+							print('INF: bad response (status {})'.format(resp.status))
 							return None
 
 						return resp

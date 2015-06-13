@@ -191,12 +191,16 @@ class BaseNewsParser:
 
 	def __get_article_from_html__(self, news_item, web_page):
 		news_item['web_page'] = web_page
+		print("INF: html page: {}".format(web_page))
 
 	def fetch_news_by_feed_list(self, news_data):
 		conn = Connector()
 		for n in news_data['news_items']:
 			print("INF: Fetching news page for '{}'".format(n['link']))
 			news_item_page = conn.get(url=n['link'])
+			if news_item_page is None:
+				continue
+
 			self.__get_article_from_html__(n, news_item_page.data)
 
 	def __store_news_data__(self, news_data, section_from_config, news_agent_name):
@@ -229,7 +233,7 @@ class BaseNewsParser:
 		self.fetch_news_by_feed_list(news_data)
 
 		# Store news in db
-		self.__store_news_data__(news_data, rss_url_info['term'], self.news_agent_name)
+		#self.__store_news_data__(news_data, rss_url_info['term'], self.news_agent_name)
 
 	# Fetch feed lists according to config urls
 	def fetch_all_feed_lists(self):
