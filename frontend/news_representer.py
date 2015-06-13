@@ -29,13 +29,17 @@ class AllNewsHandler(tornado.web.RequestHandler):
 class IDHandler(tornado.web.RequestHandler):
 	def get(self, id_item):
 		self.write("requested news item with id = " + id_item)
+#---------------------------------------------------------------
+
+class BaseHandler(tornado.web.RequestHandler):
+	def get_current_user(self):
+		# TODO: check cookie 
+		return None
 
 class LoginHandler(tornado.web.RequestHandler):
 	def get(self):
 		if self.current_user:
-			#TODO: to template
-			self.write("You are already logged in")
-			return
+			self.redirect("/logout")
 		self.render("login.html")
 
 	def post(self):
@@ -60,13 +64,10 @@ class LogoutHandler(tornado.web.RequestHandler):
 		# TODO: log out there
 		self.write("Log out there")
 
-
 class RegisterHandler(tornado.web.RequestHandler):
 	def get(self):
 		if self.current_user:
-			#TODO: to template
-			self.write("You are already logged in")
-			return
+			self.redirect("/logout")
 		self.render("register.html")
 
 	def post(self):
