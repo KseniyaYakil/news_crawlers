@@ -1,0 +1,11 @@
+need to create user
+	user: session_user
+	passw: secret987
+
+commands:
+	mysql --user=root -h 127.0.0.1
+	create user 'session_user'@'localhost' identified by 'secret987';
+	GRANT ALL PRIVILEGES ON *.* TO 'session_user'@'localhost' with grant option;
+
+	// same for 'session_user'@'%'
+

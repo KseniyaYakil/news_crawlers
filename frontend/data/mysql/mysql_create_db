@@ -1,0 +1,22 @@
+drop database session_db;
+create database session_db;
+use session_db;
+create table user (	id int(8) not null auto_increment,
+					username varchar(20) not null,
+					password varchar(20) not null,
+					name varchar(20), surname varchar(20),
+					sex char(1), email varchar(50), 
+					position varchar(50), phone_number varchar(20),
+					primary key (id));
+
+create table cookie (	cookie_token varchar(50) not null,
+						creat_time DATETIME not null, user_id int(8) not null);
+alter table cookie add foreign key (user_id) references user (id);
+
+create table roles (id int(8) not null auto_increment, name varchar(50) not null, 
+					primary key (id));
+
+create table user_roles (	id_user int(8) not null,
+							id_role int(8) not null, 
+							primary key user_roles (id_user, id_role));
+
