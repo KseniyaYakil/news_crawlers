@@ -8,6 +8,7 @@ create table user (	id int(8) not null auto_increment,
 					sex char(1), email varchar(50), 
 					position varchar(50), phone_number varchar(20),
 					primary key (id));
+alter table user add unique (username);
 
 create table cookie (	cookie_token varchar(50) not null,
 						creat_time DATETIME not null, user_id int(8) not null);
@@ -19,4 +20,9 @@ create table roles (id int(8) not null auto_increment, name varchar(50) not null
 create table user_roles (	id_user int(8) not null,
 							id_role int(8) not null, 
 							primary key user_roles (id_user, id_role));
+
+insert into user (username, password, name, surname, sex, email, position, phone_number)
+		values ('expert007', '123', 'Oleg', 'Popov', 'm', 'o.popov@mail.ru', 'HR', '+79632455121');
+insert into user (username, password, name, surname, sex, email, position, phone_number)
+		values ('mr_researcher', '123', 'Maria', 'Ivanova', 'f', 'm.ivanova@mail.ru', 'CEO', '+79156743223');
 

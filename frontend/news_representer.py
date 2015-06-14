@@ -1,8 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 
 import tornado.ioloop
 import tornado.web
 from db_connector import DBConnector
+from mysql_connector import MySQLConnector
 import time
 import datetime
 
@@ -82,13 +83,19 @@ class RegisterHandler(tornado.web.RequestHandler):
 				self.redirect("/register")
 				return
 
-		self.write("you reg data {}".format(user_data))
+		user_cn = MySQLConnector()
+		user_id = user_cn.insert_user(user_data)
+		print "user id {}".format(user_id)
+		self.redirect("/login")
 
 class AuthHandler(tornado.web.RequestHandler):
 	def get(self):
 		if self.current_user:
 			self.redirect("/")
 			return
+		user_cn = MySQLConnector()
+		users = user_cn.select_all_users()
+		print "auth: users {}".format(users)
 		self.render("auth.html")
 
 	def post(self):

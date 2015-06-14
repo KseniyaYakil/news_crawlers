@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python3
 from optparse import OptionParser
 import time
 from datetime import timedelta, datetime
