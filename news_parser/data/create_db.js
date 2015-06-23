@@ -13,3 +13,5 @@ db.news_subagent.createIndex({'link': 1, 'title': 1}, { unique : true })
 db.createCollection("news_item")
 db.news_item.createIndex({'link': 1}, { unique : true })
 
+db.createCollection("interview")
+

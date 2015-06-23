@@ -171,13 +171,13 @@ class BaseNewsParser:
 				print("ERR: unable to fetch news (no url)")
 				return None
 			url = self.news_url
-		#try:
-		print("INF: Request RSS from '{}'".format(url))
-		rss_news = feedparser.parse(url)
-		return self.__form_news_list__(rss_news)
-		#except Exception as exp:
-		#	print("ERR: {}".format(exp))
-		#	return None
+		try:
+			print("INF: Request RSS from '{}'".format(url))
+			rss_news = feedparser.parse(url)
+			return self.__form_news_list__(rss_news)
+		except Exception as exp:
+			print("ERR: {}".format(exp))
+			return None
 
 	def filter_by_time(self, news_data, time_mark):
 		news_after_date = []
@@ -233,7 +233,7 @@ class BaseNewsParser:
 		self.fetch_news_by_feed_list(news_data)
 
 		# Store news in db
-		#self.__store_news_data__(news_data, rss_url_info['term'], self.news_agent_name)
+		self.__store_news_data__(news_data, rss_url_info['term'], self.news_agent_name)
 
 	# Fetch feed lists according to config urls
 	def fetch_all_feed_lists(self):

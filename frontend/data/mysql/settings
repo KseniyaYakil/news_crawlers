@@ -8,4 +8,6 @@ commands:
 	GRANT ALL PRIVILEGES ON *.* TO 'session_user'@'localhost' with grant option;
 
 	// same for 'session_user'@'%'
+connect:
+	mysql -h 127.0.0.1 -u session_user -p
 

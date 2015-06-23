@@ -18,8 +18,7 @@ class Connector:
 							print('ERR: empty response')
 							return None
 
-						print("INF: recv status={}".format(resp.status)
-
+						print("INF: recv status={}".format(resp.status))
 						return resp
 				except Exception as ex:
 						print('ERR: {}'.format(ex))

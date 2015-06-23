@@ -6,6 +6,8 @@ import sys
 sys.path.append("../util")
 from session_agent import SessionAgent
 from base_handler import BaseHandler
+from mongodb_connector import MongoConnector
+from interview_builder import InterviewBuilder
 
 main_front = 'http://127.0.0.1:8888'
 main_front_auth = main_front + '/auth'
@@ -35,6 +37,11 @@ class MainHandler(BaseHandler):
 
 class InterviewHandler(tornado.web.RequestHandler):
 	def get(self):
+		# form new interview items
+		i_builder = InterviewBuilder()
+		i_builder.create_new_interviews()
+
+		# select list of interviews - paging?
 		self.write("Interview")
 
 application = tornado.web.Application([
