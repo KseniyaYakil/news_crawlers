@@ -127,4 +127,14 @@ class MySQLConnector:
 		except Exception as ex:
 			print 'ERR: {}'.format(ex)
 
+	def role_by_cookie(self, user_cookie):
+		try:
+			role_info = self.db.query("select id_role from cookie as c join user_roles as ur on c.user_id=ur.id_user")
+			print 'DEB: role_info=\'{}\' by cookie'.format(role_info)
+			return role_info[0]['id_role']
+		except Exception as ex:
+			print 'ERR: {}'.format(ex)
+			return None
+
+
 

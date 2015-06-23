@@ -30,20 +30,22 @@ class SessionAgent:
 		self.host = '127.0.0.1'
 		self.port = '8887'
 		self.url = 'http://' + self.host + ':' + self.port
-		self.reg_user = '/reg'
-		self.login_user = '/login'
-		self.logout_user = '/logout'
 		self.auth_user = '/auth'
+		self.role_user = '/role'
 		self.conn = Connector()
 
 	def register_user(self, user_data):
-		return self.conn.send_req(url=self.url + self.reg_user, method='PUT', fields=user_data)
+		return self.conn.send_req(url=self.url + self.auth_user, method='PUT', fields=user_data)
 
 	def self_login_user(self, user_data):
-		return self.conn.send_req(url=self.url + self.login_user, method='POST', fields=user_data)
+		return self.conn.send_req(url=self.url + self.auth_user, method='POST', fields=user_data)
 
 	def self_logout_user(self, user_data):
-		return self.conn.send_req(url=self.url + self.logout_user, method='DELETE', fields=user_data)
+		return self.conn.send_req(url=self.url + self.auth_user, method='DELETE', fields=user_data)
 
 	def is_authorized(self, user_data):
 		return self.conn.send_req(url=self.url + self.auth_user, method='GET', fields=user_data)
+
+	def get_role_by_cookie(self, user_data):
+		return self.conn.send_req(url=self.url + self.role_user, method='GET', fields=user_data)
+

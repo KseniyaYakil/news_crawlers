@@ -3,10 +3,15 @@
 import tornado.ioloop
 import tornado.web
 import json
+import sys
+sys.path.append("../util")
+
 from session_agent import SessionAgent
 from db_connector import DBConnector
 import time
 import datetime
+
+expert_main = 'http://127.0.0.1:8890'
 
 class AllNewsHandler(tornado.web.RequestHandler):
 	def __get_prev_days__(self, n_days):
@@ -116,7 +121,6 @@ class RegisterHandler(BaseHandler):
 		s_agent = SessionAgent()
 		resp = s_agent.register_user(user_data)
 
-		#json.loads(resp.data.decode('utf-8'))
 		msg = 'Successfull registration'
 		if resp.status != 201:
 			msg = resp.reason
@@ -140,11 +144,21 @@ class AuthHandler(BaseHandler):
 
 class MainHandler(BaseHandler):
 	def get(self):
-		if not self.get_current_user():
+		cookie = self.get_current_user()
+		if not cookie:
 			self.redirect("/auth")
 			return
-		# TODO: foreach user role show different home pages
-		self.write("Welcome to news rating system!")
+
+		s_agent = SessionAgent()
+		resp = s_agent.get_role_by_cookie({'user_cookie': cookie})
+		if resp.status != 200:
+			self.send_error(500)
+
+		role_info = json.loads(resp.data.decode('utf-8'))
+		if role_info['id'] == 1:
+			self.redirect(expert_main)
+		else:
+			self.write("Welcome to news rating system!")
 
 application = tornado.web.Application([
 	(r"/", MainHandler),

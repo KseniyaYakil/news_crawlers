@@ -6,7 +6,21 @@ import tornado.httputil as util
 import json
 from mysql_connector import MySQLConnector
 
-class RegUserHandler(tornado.web.RequestHandler):
+class AuthUserHandler(tornado.web.RequestHandler):
+	def get(self):
+		self.set_status(200)
+		user_cookie = self.get_argument('user_cookie', '')
+		if not user_cookie:
+			self.set_status(400, reason='incorrect data')
+			print 'INF: incorrect request data'
+			return
+		print 'INF: check cookie {} in db'.format(user_cookie)
+		user_cn = MySQLConnector()
+		user_id = user_cn.get_user_by_cookie(user_cookie)
+		if user_id is None:
+			self.set_status(401, reason='no user for cookie')
+			return
+
 	def put(self):
 		user_data = json.loads(self.request.body)
 
@@ -19,7 +33,6 @@ class RegUserHandler(tornado.web.RequestHandler):
 		else:
 			self.set_status(409, reason='unable to insert user')
 
-class LoginUserHandler(tornado.web.RequestHandler):
 	def post(self):
 		self.set_status(202)
 		user_data = {'username': '', 'password': ''}
@@ -43,7 +56,6 @@ class LoginUserHandler(tornado.web.RequestHandler):
 
 		self.write(json.dumps({'user_cookie': user_cookie}))
 
-class LogoutUserHandler(tornado.web.RequestHandler):
 	def delete(self):
 		self.set_status(200)
 		user_cookie = self.get_argument('user_cookie', '')
@@ -56,20 +68,17 @@ class LogoutUserHandler(tornado.web.RequestHandler):
 		user_cn.del_cookie(user_cookie)
 		print 'INF: cookie {} was deleted'.format(user_cookie)
 
-class AuthUserHandler(tornado.web.RequestHandler):
+class RoleHandler(tornado.web.RequestHandler):
 	def get(self):
-		self.set_status(200)
 		user_cookie = self.get_argument('user_cookie', '')
 		if not user_cookie:
 			self.set_status(400, reason='incorrect data')
 			print 'INF: incorrect request data'
 			return
-		print 'INF: check cookie {} in db'.format(user_cookie)
 		user_cn = MySQLConnector()
-		user_id = user_cn.get_user_by_cookie(user_cookie)
-		if user_id is None:
-			self.set_status(401, reason='no user for cookie')
-			return
+		role_id = user_cn.role_by_cookie(user_cookie)
+
+		self.write(json.dumps({'id': role_id}))
 
 class MainHandler(tornado.web.RequestHandler):
 	def get(self):
@@ -77,10 +86,8 @@ class MainHandler(tornado.web.RequestHandler):
 
 application = tornado.web.Application([
 	(r"/", MainHandler),
-	(r"/reg", RegUserHandler),
-	(r"/login", LoginUserHandler),
-	(r"/logout", LogoutUserHandler),
-	(r"/auth", AuthUserHandler)
+	(r"/auth", AuthUserHandler),
+	(r"/role", RoleHandler),
 ])
 
 if __name__ == "__main__":
