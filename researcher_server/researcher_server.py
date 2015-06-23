@@ -16,7 +16,7 @@ class MainHandler(BaseHandler):
 		if not self.get_current_user():
 			self.redirect(main_front_auth)
 			return
-		self.render("index_expert.html")
+		self.render("index_researcher.html")
 
 	def post(self):
 		user_cookie = self.get_current_user()
@@ -24,26 +24,25 @@ class MainHandler(BaseHandler):
 			self.redirect(main_front_auth)
 			return
 
-		if self.get_argument('pass', '') != '':
-			self.redirect("/interview")
+		if self.get_argument('show', '') != '':
+			self.redirect("/results")
 			return
 		if self.get_argument('logout', '') != '':
-			# TODO: read host + port from config
 			self.redirect(main_front_logout)
 			return
 		self.redirect("/")
 
-class InterviewHandler(tornado.web.RequestHandler):
+class ResultsHandler(BaseHandler):
 	def get(self):
-		self.write("Interview")
+		self.write("results here")
 
 application = tornado.web.Application([
 	(r"/", MainHandler),
-	(r"/interview", InterviewHandler)
+	(r"/results", ResultsHandler)
 ])
 
 if __name__ == "__main__":
-	application.listen(8890)
+	application.listen(8891)
 	tornado.ioloop.IOLoop.instance().start()
 
 

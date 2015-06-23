@@ -7,11 +7,13 @@ import sys
 sys.path.append("../util")
 
 from session_agent import SessionAgent
+from base_handler import BaseHandler
 from db_connector import DBConnector
 import time
 import datetime
 
 expert_main = 'http://127.0.0.1:8890'
+researcher_main = 'http://127.0.0.1:8891'
 
 class AllNewsHandler(tornado.web.RequestHandler):
 	def __get_prev_days__(self, n_days):
@@ -37,18 +39,6 @@ class IDHandler(tornado.web.RequestHandler):
 	def get(self, id_item):
 		self.write("requested news item with id = " + id_item)
 #---------------------------------------------------------------
-
-class BaseHandler(tornado.web.RequestHandler):
-	def get_current_user(self):
-		cookie = self.get_cookie('user_cookie')
-		if not cookie:
-			return None
-		print 'DEB: check cookie ' + cookie
-		s_agent = SessionAgent()
-		resp = s_agent.is_authorized({'user_cookie': cookie})
-		if resp.status == 200:
-			return cookie
-		return None
 
 class LoginHandler(BaseHandler):
 	def get(self):
@@ -157,6 +147,8 @@ class MainHandler(BaseHandler):
 		role_info = json.loads(resp.data.decode('utf-8'))
 		if role_info['id'] == 1:
 			self.redirect(expert_main)
+		elif role_info['id'] == 2:
+			self.redirect(researcher_main)
 		else:
 			self.write("Welcome to news rating system!")
 
