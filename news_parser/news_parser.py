@@ -197,7 +197,7 @@ class BaseNewsParser:
 		conn = Connector()
 		for n in news_data['news_items']:
 			print("INF: Fetching news page for '{}'".format(n['link']))
-			news_item_page = conn.get(url=n['link'])
+			news_item_page = conn.send_req('GET', url=n['link'])
 			if news_item_page is None:
 				continue
 

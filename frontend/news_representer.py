@@ -2,8 +2,9 @@
 
 import tornado.ioloop
 import tornado.web
+import json
+from session_agent import SessionAgent
 from db_connector import DBConnector
-from mysql_connector import MySQLConnector
 import time
 import datetime
 
@@ -18,7 +19,7 @@ class AllNewsHandler(tornado.web.RequestHandler):
 	def get(self):
 		db_conn = DBConnector()
 
-		after_time = self.__get_prev_days__(60)
+		after_time = self.__get_prev_days__(15)
 		news_items = db_conn.after_date_news(after_time)
 
 		to_render = []
@@ -34,41 +35,69 @@ class IDHandler(tornado.web.RequestHandler):
 
 class BaseHandler(tornado.web.RequestHandler):
 	def get_current_user(self):
-		# TODO: check cookie 
+		cookie = self.get_cookie('user_cookie')
+		if not cookie:
+			return None
+		print 'DEB: check cookie ' + cookie
+		s_agent = SessionAgent()
+		resp = s_agent.is_authorized({'user_cookie': cookie})
+		if resp.status == 200:
+			return cookie
 		return None
 
-class LoginHandler(tornado.web.RequestHandler):
+class LoginHandler(BaseHandler):
 	def get(self):
-		if self.current_user:
+		if self.get_current_user():
 			self.redirect("/logout")
+			return
 		self.render("login.html")
 
 	def post(self):
-		username = self.get_argument('username', '')
-		password = self.get_argument('password', '')
+		user_data = {}
+		user_data['username'] = self.get_argument('username', '')
+		user_data['password'] = self.get_argument('password', '')
 
-		if not username or not password:
+		if	not user_data['username'] or \
+			not user_data['password']:
 			self.redirect("/login")
 			return
-		self.write("your username {} and password {}".format(username, password))
 
-class LogoutHandler(tornado.web.RequestHandler):
-	def get(self):
-		if not self.current_user:
+		s_agent = SessionAgent()
+		resp = s_agent.self_login_user(user_data)
+		if resp.status == 202:
+			cookie = json.loads(resp.data.decode('utf-8'))
+			self.set_cookie('user_cookie', cookie['user_cookie'])
 			self.redirect("/")
+			return
+
+		msg = resp.reason
+		print 'INF: user {} is not logged in: {}'.format(user_data['username'], resp.reason)
+		self.redirect('/auth')
+
+class LogoutHandler(BaseHandler):
+	def get(self):
+		if not self.get_current_user():
+			self.redirect("/")
+			return
+
 		self.render("logout.html")
 
 	def post(self):
-		if not self.current_user:
+		user_cookie = self.get_current_user()
+		if not user_cookie:
 			self.redirect("/")
+			return
 
-		# TODO: log out there
-		self.write("Log out there")
+		s_agent = SessionAgent()
+		resp = s_agent.self_logout_user({'user_cookie': user_cookie})
+		self.clear_cookie('user_cookie')
+		self.redirect("/")
 
-class RegisterHandler(tornado.web.RequestHandler):
+class RegisterHandler(BaseHandler):
 	def get(self):
-		if self.current_user:
+		if self.get_current_user():
 			self.redirect("/logout")
+			return
 		self.render("register.html")
 
 	def post(self):
@@ -77,25 +106,27 @@ class RegisterHandler(tornado.web.RequestHandler):
 		user_data['surname'] = self.get_argument('surname', '')
 		user_data['username'] = self.get_argument('username', '')
 		user_data['password'] = self.get_argument('password', '')
+		user_data['role'] = self.get_argument('role', '')
 
 		for k, v in user_data.items():
 			if not v:
 				self.redirect("/register")
 				return
 
-		user_cn = MySQLConnector()
-		user_id = user_cn.insert_user(user_data)
-		print "user id {}".format(user_id)
-		self.redirect("/login")
+		s_agent = SessionAgent()
+		resp = s_agent.register_user(user_data)
 
-class AuthHandler(tornado.web.RequestHandler):
+		#json.loads(resp.data.decode('utf-8'))
+		msg = 'Successfull registration'
+		if resp.status != 201:
+			msg = resp.reason
+		self.render("end_of_user_reg.html", msg=msg)
+
+class AuthHandler(BaseHandler):
 	def get(self):
-		if self.current_user:
+		if self.get_current_user():
 			self.redirect("/")
 			return
-		user_cn = MySQLConnector()
-		users = user_cn.select_all_users()
-		print "auth: users {}".format(users)
 		self.render("auth.html")
 
 	def post(self):
@@ -107,9 +138,9 @@ class AuthHandler(tornado.web.RequestHandler):
 			return
 		raise tornado.web.HTTPError(500)
 
-class MainHandler(tornado.web.RequestHandler):
+class MainHandler(BaseHandler):
 	def get(self):
-		if not self.current_user:
+		if not self.get_current_user():
 			self.redirect("/auth")
 			return
 		# TODO: foreach user role show different home pages

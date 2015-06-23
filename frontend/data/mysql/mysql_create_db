@@ -11,11 +11,13 @@ create table user (	id int(8) not null auto_increment,
 alter table user add unique (username);
 
 create table cookie (	cookie_token varchar(50) not null,
-						creat_time DATETIME not null, user_id int(8) not null);
+						creat_time DATETIME not null default now(), user_id int(8) not null);
 alter table cookie add foreign key (user_id) references user (id);
 
 create table roles (id int(8) not null auto_increment, name varchar(50) not null, 
 					primary key (id));
+
+alter table roles add unique (name);
 
 create table user_roles (	id_user int(8) not null,
 							id_role int(8) not null, 
@@ -25,4 +27,10 @@ insert into user (username, password, name, surname, sex, email, position, phone
 		values ('expert007', '123', 'Oleg', 'Popov', 'm', 'o.popov@mail.ru', 'HR', '+79632455121');
 insert into user (username, password, name, surname, sex, email, position, phone_number)
 		values ('mr_researcher', '123', 'Maria', 'Ivanova', 'f', 'm.ivanova@mail.ru', 'CEO', '+79156743223');
+
+insert into roles (name) values ('expert');
+insert into roles (name) values ('researcher');
+
+insert into user_roles (id_user, id_role) values (1, 1);
+insert into user_roles (id_user, id_role) values (2, 2);
 
