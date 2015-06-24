@@ -21,21 +21,20 @@ class MainHandler(BaseHandler):
 		if not self.get_current_user():
 			self.redirect(main_front_auth)
 			return
+		print 'user {}'.format(self.current_user)
 		self.render("index_expert.html")
 
 	def post(self):
-		user_cookie = self.get_current_user()
-		if not user_cookie:
-			self.redirect(main_front_auth)
-			return
-
 		if self.get_argument('pass', '') != '':
+			print 'interview'
 			self.redirect("/interview")
 			return
 		if self.get_argument('logout', '') != '':
+			print 'logout'
 			# TODO: read host + port from config
 			self.redirect(main_front_logout)
 			return
+		print 'no arg'
 		self.redirect("/")
 
 class InterviewHandler(tornado.web.RequestHandler):
@@ -46,21 +45,38 @@ class InterviewHandler(tornado.web.RequestHandler):
 
 		db_conn = MongoConnector()
 		all_interviews = db_conn.get_all_interviews()
-		print 'got interviews {}'.format(all_interviews)
+		#print 'got interviews {}'.format(all_interviews)
 
 		pagination = Pagination(all_interviews, int(page), per_page=interview_per_page)
 		self.render('interview_list.html',
-					pagination=pagination, interview_pass='pass', endpoint='/interview')
+					pagination=pagination, interview_pass='/interview/pass', endpoint='/interview')
 
 class InterviewItemHandler(tornado.web.RequestHandler):
 	def get(self, obj_id):
-		self.write("Interview item {}".format(obj_id))
+		db_conn = MongoConnector()
+		news_items = db_conn.get_interview_articles(obj_id)
+		self.render("interview_item.html", endpoint="/interview/pass/{}".format(obj_id), news_items=news_items)
+
+	def post(self, obj_id, news_cnt):
+		news_items = []
+		for index in range(int(news_cnt)):
+			res = self.get_argument('role_id{}'.format(index), None)
+			news_item_id = self.get_argument('obj_id{}'.format(index), None)
+			if res is None:
+				res = 'bad'
+			news_items.append({'id': news_item_id, 'selection': res})
+			print 'DEB: Selection for text {}: {}'.format(index, res)
+
+		db_conn = MongoConnector()
+		db_conn.update_interview(obj_id, news_items)
+		self.write("Thank you for passing through this interview")
 
 application = tornado.web.Application([
 	(r"/", MainHandler),
 	(r"/interview", InterviewHandler),
 	(r"/interview/(\d+)", InterviewHandler),
 	(r"/interview/pass/(?P<obj_id>[\w\d]+)", InterviewItemHandler),
+	(r"/interview/pass/(?P<obj_id>[\w\d]+)/(?P<news_cnt>\d+)", InterviewItemHandler),
 ])
 
 if __name__ == "__main__":

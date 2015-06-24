@@ -6,10 +6,10 @@ class BaseHandler(tornado.web.RequestHandler):
 		cookie = self.get_cookie('user_cookie')
 		if not cookie:
 			return None
-		print 'DEB: check cookie ' + cookie
 		s_agent = SessionAgent()
 		resp = s_agent.is_authorized({'user_cookie': cookie})
 		if resp.status == 200:
+			print 'DEB: has cookie {}'.format(cookie)
 			return cookie
 		return None
 

@@ -1,0 +1,26 @@
+<html>
+	<body>
+	<p>Please, appraise all texts as 'good' or 'bad'</p>
+	<p>It is assumed that 'bad' is default value</p>
+	<form action="{{ endpoint }}/{{ len(news_items) }}" method="post">
+	{% for i, item in enumerate(news_items) %}
+	<table>
+		<tr>
+			<td><h4>{{ item['title'] }}</h4></td>
+			<td><input name='obj_id{{ i }}' value="{{ item['_id'] }}" hidden></td>
+		</tr>
+		<tr>
+			<td><p>{{ item['text'] }}</p></td>
+		</tr>
+		<tr>
+			<td><select name="role_id{{ i }}" multiple>
+					<option value="good">Good</option>
+					<option value="bad">Bad</option>
+				</select>
+			</td>
+		</tr>
+	</table>
+	{% end %}
+	<input type="submit" name="done" value="Done">
+	</body>
+</html>
