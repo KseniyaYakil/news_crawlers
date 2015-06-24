@@ -21,6 +21,22 @@ class MongoConnector():
 			print("ERR: mongodb: connection to db failed")
 			return False
 
+	def get_interview(self, obj_id):
+		try:
+			interview_info = self.db.interview.find_one({'_id': ObjectId(obj_id)})
+			res = {	'name': interview_info['name'],
+					'_id': interview_info['_id'],
+					'news': []}
+			for n in interview_info['news']:
+				news_item = self.db.news_item.find_one({'_id': ObjectId(n['id'])})
+				news_item['score'] = n['score']
+				news_item['appraisal_cnt'] = n['appraisal_cnt']
+				res['news'].append(news_item)
+			return res
+		except Exception as ex:
+			print 'ERR: {}'.format(ex)
+			return None
+
 	def insert_interview(self, interview_data):
 		if	'title' not in interview_data.keys() or \
 			'articles' not in interview_data.keys():

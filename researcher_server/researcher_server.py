@@ -46,7 +46,9 @@ class ResultsHandler(BaseHandler):
 
 class ResultsItemHandler(BaseHandler):
 	def get(self, obj_id):
-		self.write("obj id " + obj_id)
+		db_conn = MongoConnector()
+		interview_item = db_conn.get_interview(obj_id)
+		self.render("results_item.html", interview_info=interview_item)
 
 application = tornado.web.Application([
 	(r"/", MainHandler),
@@ -58,5 +60,3 @@ application = tornado.web.Application([
 if __name__ == "__main__":
 	application.listen(8891)
 	tornado.ioloop.IOLoop.instance().start()
-
-
