@@ -42,6 +42,18 @@ class MongoConnector():
 			print 'ERR: {}'.format(ex)
 			return None
 
+	def get_all_interviews(self):
+		try:
+			all_interviews = self.db.interview.find()
+			res = []
+			for i in all_interviews:
+				res.append(i)
+
+			return res
+		except Exception as ex:
+			print 'ERR: {}'.format(ex)
+			return None
+
 	def insert_interview(self, interview_el):
 		try:
 			return self.db.interview.insert_one(interview_el).inserted_id
@@ -53,13 +65,14 @@ class MongoConnector():
 		try:
 			news = self.db.news_item
 			news_data = news.find()
+			news_cnt = news.count()
 
 			res = set()
 			res_news = []
 			for i in range(n):
-				rand = random.randrange(n)
+				rand = random.randrange(news_cnt)
 				while rand in res:
-					rand = random.randrange(n)
+					rand = random.randrange(news_cnt)
 				res.add(rand)
 				res_news.append(news_data[rand])
 

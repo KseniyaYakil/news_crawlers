@@ -6,12 +6,15 @@ import sys
 sys.path.append("../util")
 from session_agent import SessionAgent
 from base_handler import BaseHandler
+from paginator import Pagination
+
 from mongodb_connector import MongoConnector
 from interview_builder import InterviewBuilder
 
 main_front = 'http://127.0.0.1:8888'
 main_front_auth = main_front + '/auth'
 main_front_logout = main_front + '/logout'
+interview_per_page = 2
 
 class MainHandler(BaseHandler):
 	def get(self):
@@ -36,17 +39,28 @@ class MainHandler(BaseHandler):
 		self.redirect("/")
 
 class InterviewHandler(tornado.web.RequestHandler):
-	def get(self):
+	def get(self, page=1):
 		# form new interview items
 		i_builder = InterviewBuilder()
 		i_builder.create_new_interviews()
 
-		# select list of interviews - paging?
-		self.write("Interview")
+		db_conn = MongoConnector()
+		all_interviews = db_conn.get_all_interviews()
+		print 'got interviews {}'.format(all_interviews)
+
+		pagination = Pagination(all_interviews, int(page), per_page=interview_per_page)
+		self.render('interview_list.html',
+					pagination=pagination, interview_pass='pass', endpoint='/interview')
+
+class InterviewItemHandler(tornado.web.RequestHandler):
+	def get(self, obj_id):
+		self.write("Interview item {}".format(obj_id))
 
 application = tornado.web.Application([
 	(r"/", MainHandler),
-	(r"/interview", InterviewHandler)
+	(r"/interview", InterviewHandler),
+	(r"/interview/(\d+)", InterviewHandler),
+	(r"/interview/pass/(?P<obj_id>[\w\d]+)", InterviewItemHandler),
 ])
 
 if __name__ == "__main__":
