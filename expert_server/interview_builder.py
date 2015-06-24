@@ -1,3 +1,5 @@
+import sys
+sys.path.append("../util")
 from mongodb_connector import MongoConnector
 
 class InterviewBuilder():

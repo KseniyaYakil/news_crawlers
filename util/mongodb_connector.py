@@ -1,7 +1,7 @@
 import pymongo
 from pymongo import MongoClient
-import random
 from bson.objectid import ObjectId
+import random
 
 class MongoConnector():
 	def __init__(self, host='localhost', port=27017, debug=False):
@@ -76,16 +76,17 @@ class MongoConnector():
 
 	def update_interview(self, obj_id, news_items):
 		try:
-			news_item_id = news_items[0]['id']
-
-			if news_items[0]['selection'] == 'good':
-				score = 1
-			else:
-				score = 0
-			print 'DEB: obj_id {} news_item_id {} score {}'.format(obj_id, news_item_id, score)
-			self.db.interview.update(	{"$and": [	{"_id": ObjectId(obj_id)},
-													{"news": {"$elemMatch": { "id": ObjectId(news_item_id)}}}]},
-										{"$inc": {"news.$.score": int(score), "news.$.appraisal_cnt": int(1)}})
+			for n_item in news_items:
+				print 'news item {}'.format(n_item)
+				news_item_id = n_item['id']
+				if n_item['selection'] == 'good':
+					score = 1
+				else:
+					score = 0
+				print 'DEB: obj_id {} news_item_id {} score {}'.format(obj_id, news_item_id, score)
+				self.db.interview.update(	{"$and": [	{"_id": ObjectId(obj_id)},
+														{"news": {"$elemMatch": { "id": ObjectId(news_item_id)}}}]},
+											{"$inc": {"news.$.score": int(score), "news.$.appraisal_cnt": int(1)}})
 		except Exception as ex:
 			print 'ERR: {}'.format(ex)
 
