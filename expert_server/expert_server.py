@@ -63,7 +63,7 @@ class InterviewItemHandler(tornado.web.RequestHandler):
 	def get(self, obj_id):
 		db_conn = MongoConnector()
 		news_items = db_conn.get_interview_articles(obj_id)
-		self.render("interview_item.html", endpoint="/interview/pass/{}".format(obj_id), news_items=news_items)
+		self.render("interview_item_bootstrap.html", endpoint="/interview/pass/{}".format(obj_id), news_items=news_items)
 
 	def post(self, obj_id, news_cnt):
 		news_items = []
@@ -86,6 +86,13 @@ application = tornado.web.Application([
 	(r"/interview/(\d+)", InterviewHandler),
 	(r"/interview/pass/(?P<obj_id>[\w\d]+)", InterviewItemHandler),
 	(r"/interview/pass/(?P<obj_id>[\w\d]+)/(?P<news_cnt>\d+)", InterviewItemHandler),
+
+	(r"/interview/pass/index_files/cloudflare.js()", tornado.web.StaticFileHandler, {'path': '../static/index_files/cloudflare.js'}),
+	(r"/interview/pass/index_files/ga.js()", tornado.web.StaticFileHandler, {'path': '../static/index_files/ga.js'}),
+	(r"/interview/pass/index_files/rocket.js()", tornado.web.StaticFileHandler, {'path': '../static/index_files/rocket.js'}),
+	(r"/interview/pass/index_files/bootstrap-responsive.css()", tornado.web.StaticFileHandler, {'path': '../static/index_files/bootstrap-responsive.css'}),
+	(r"/interview/pass/index_files/bootstrap.css()", tornado.web.StaticFileHandler, {'path': '../static/index_files/bootstrap.css'}),
+	(r"/interview/pass/index_files/rocket.js()", tornado.web.StaticFileHandler, {'path': '../static/index_files/rocket.js'}),
 
 	(r"/interview/index_files/cloudflare.js()", tornado.web.StaticFileHandler, {'path': '../static/index_files/cloudflare.js'}),
 	(r"/interview/index_files/ga.js()", tornado.web.StaticFileHandler, {'path': '../static/index_files/ga.js'}),
