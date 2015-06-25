@@ -1,0 +1,19 @@
+<html>
+	<body>
+	<h4>Result for interview '{{ interview_info['name'] }}'</h4>
+	<table>
+		<tr>
+			<td>Title</td>
+			<td width=100 align='center'>Good</td>
+			<td width=100 align='center'>All</td>
+		</tr>
+	{% for n in interview_info['news'] %}
+		<tr>
+			<td>{{ n['title'] }}</td>
+			<td align='center'>{{ n['score'] }}</td>
+			<td align='center'>{{ n['appraisal_cnt'] }}</td>
+		</tr>
+	{% end %}
+	</table>
+	</body>
+</html>
