@@ -77,7 +77,7 @@ class InterviewItemHandler(tornado.web.RequestHandler):
 
 		db_conn = MongoConnector()
 		db_conn.update_interview(obj_id, news_items)
-		self.write("Thank you for passing through this interview")
+		self.redirect("/")
 
 application = tornado.web.Application([
 	(r"/", MainHandler),
