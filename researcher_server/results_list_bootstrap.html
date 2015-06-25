@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<title>News rating system</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+ 
+<script src="index_files/ga.js" async="" type="text/javascript"></script><script type="text/javascript">
+//<![CDATA[
+try{if (!window.CloudFlare) {var CloudFlare=[{verbose:0,p:0,byc:0,owlid:"cf",bag2:1,mirage2:0,oracle:0,paths:{cloudflare:"/cdn-cgi/nexp/dok3v=1613a3a185/"},atok:"cbb37373960e8af8a4587e7ce927071f",petok:"03ca480c8c4e20b3b2d8591bbc1ee36012939fd8-1435181512-1800",zone:"bootstrap-ru.com",rocket:"a",apps:{"ga_key":{"ua":"UA-12784007-23","ga_bs":"2"}}}];document.write('<script type="text/javascript" src="//ajax.cloudflare.com/cdn-cgi/nexp/dok3v=7e13c32551/cloudflare.min.js"><'+'\/script>');}}catch(e){};
+//]]>
+</script><script type="text/javascript" src="index_files/cloudflare.js"></script><style type="text/css">.cf-hidden { display: none; } .cf-invisible { visibility: hidden; }</style><script data-module="cloudflare/rocket" id="cfjs_block_fd9073e074" onload="CloudFlare.__cfjs_block_fd9073e074_load()" onerror="CloudFlare.__cfjs_block_fd9073e074_error()" onreadystatechange="CloudFlare.__cfjs_block_fd9073e074_readystatechange()" type="text/javascript" src="index_files/rocket.js"></script>
+<link href="index_files/bootstrap.css" rel="stylesheet">
+<style>body{padding-top:60px;}</style>
+<link href="index_files/bootstrap-responsive.css" rel="stylesheet">
+ 
+<!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+ 
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="http://bootstrap-ru.com/assets/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="http://bootstrap-ru.com/assets/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="http://bootstrap-ru.com/assets/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="http://bootstrap-ru.com/assets/ico/apple-touch-icon-57-precomposed.png">
+<link rel="shortcut icon" href="http://bootstrap-ru.com/assets/ico/favicon.png">
+<script type="text/javascript">
+/* <![CDATA[ */
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-12784007-23']);
+_gaq.push(['_trackPageview']);
+
+(function() {
+var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+
+(function(b){(function(a){"__CF"in b&&"DJS"in b.__CF?b.__CF.DJS.push(a):"addEventListener"in b?b.addEventListener("load",a,!1):b.attachEvent("onload",a)})(function(){"FB"in b&&"Event"in FB&&"subscribe"in FB.Event&&(FB.Event.subscribe("edge.create",function(a){_gaq.push(["_trackSocial","facebook","like",a])}),FB.Event.subscribe("edge.remove",function(a){_gaq.push(["_trackSocial","facebook","unlike",a])}),FB.Event.subscribe("message.send",function(a){_gaq.push(["_trackSocial","facebook","send",a])}));"twttr"in b&&"events"in twttr&&"bind"in twttr.events&&twttr.events.bind("tweet",function(a){if(a){var b;if(a.target&&a.target.nodeName=="IFRAME")a:{if(a=a.target.src){a=a.split("#")[0].match(/[^?=&]+=([^&]*)?/g);b=0;for(var c;c=a[b];++b)if(c.indexOf("url")===0){b=unescape(c.split("=")[1]);break a}}b=void 0}_gaq.push(["_trackSocial","twitter","tweet",b])}})})})(window);
+/* ]]> */
+</script>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-fixed-top">
+<div class="navbar-inner">
+<div class="container">
+<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+<span class="icon-bar"></span>
+</a>
+<a class="brand" href="/">News rating system</a>
+<div class="nav-collapse collapse">
+<ul class="nav">
+<li class="active"><a href="/">Home</a></li>
+<li class="active"><a href="/logout">Logout</a></li>
+</ul>
+</div> 
+</div>
+</div>
+</div>
+<div class="container">
+<h1>Interview list </h1>
+<table>
+			<tr>
+				<td witdh=150>Name</td>
+				<td width=150>Pass</td>
+			</tr>
+		{% for item in pagination.cur_page_items() %}
+			<tr>
+				<td width=150>{{ item['name'] }}</td>
+				<td width=150><a href="{{ results_show }}/{{item['_id']}}">show</td>
+			</tr>
+		{% end %}
+		</table>
+		<div class="paging">
+		<table>
+		<tr>
+			{% for page in pagination.iter_pages() %}
+			{% if page %}
+			  {% if page != pagination.page %}
+				<td width=40><a href="{{endpoint}}/{{page}}">{{ page }}</a></td>
+			  {% else %}
+				<td width=40><span id="p_num" class="current">{{ page }}</span></td>
+			  {% end %}
+			{% else %}
+			{% end %}
+		  {% end %}
+		  </tr>
+		  <tr>
+			<td>
+			{% if pagination.has_prev %}
+				<a id="p_pre" href="{{endpoint}}/{{pagination.page-1}}">prev</a>
+			{% end %}
+			</td>
+			<td>
+			{% if pagination.has_next %}
+					<a id="p_next" href="{{endpoint}}/{{pagination.page+1}}" rel="nofollow">next</a>
+			  {% end %}
+			</td>
+		  </tr>
+		</table>
+			<span id="p_meta">Total {{pagination.total}} pages; {{pagination.page}}/{{pagination.pages}} </span>
+		  </div>
+</div>  
+ 
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/jquery.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-transition.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-alert.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-modal.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-dropdown.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-scrollspy.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-tab.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-tooltip.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-popover.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-button.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-collapse.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-carousel.js" type="text/rocketscript"></script>
+<script data-rocketoptimized="true" data-rocketsrc="../assets/js/bootstrap-typeahead.js" type="text/rocketscript"></script>
+
+
+</body></html>
